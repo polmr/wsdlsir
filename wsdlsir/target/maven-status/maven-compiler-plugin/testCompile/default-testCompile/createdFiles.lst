@@ -1,0 +1,10 @@
+net/sf/taverna/t2/activities/wsdlsir/security/SecureServicesInvokerTest.class
+net/sf/taverna/t2/activities/wsdlsir/WSRFActivityTest$DummyInvoker.class
+net/sf/taverna/t2/activities/wsdlsir/security/HTTPSConnectionsTest.class
+net/sf/taverna/t2/activities/wsdlsir/xmlsplitter/XMLInputSplitterActivityTest.class
+net/sf/taverna/t2/activities/wsdlsir/xmlsplitter/XMLSplitterConfigurationBeanBuilderTest.class
+net/sf/taverna/t2/activities/wsdlsir/xmlsplitter/AddXMLSplitterEditTest.class
+net/sf/taverna/t2/activities/wsdlsir/WSRFActivityTest.class
+net/sf/taverna/t2/activities/wsdlsir/WSDLActivityTest.class
+net/sf/taverna/t2/activities/wsdlsir/xmlsplitter/XMLOutputSplitterActivityTest.class
+net/sf/taverna/t2/activities/wsdlsir/security/SecureServicesInvokerTest$1.class

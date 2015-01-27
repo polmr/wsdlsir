@@ -1,0 +1,8 @@
+/home/pol/workspace_para_taverna2/taverna-workbench-2.5.0/engine/net.sf.taverna.t2.activities/wsdlsir/src/test/java/net/sf/taverna/t2/activities/wsdlsir/WSDLActivityTest.java
+/home/pol/workspace_para_taverna2/taverna-workbench-2.5.0/engine/net.sf.taverna.t2.activities/wsdlsir/src/test/java/net/sf/taverna/t2/activities/wsdlsir/xmlsplitter/XMLOutputSplitterActivityTest.java
+/home/pol/workspace_para_taverna2/taverna-workbench-2.5.0/engine/net.sf.taverna.t2.activities/wsdlsir/src/test/java/net/sf/taverna/t2/activities/wsdlsir/security/HTTPSConnectionsTest.java
+/home/pol/workspace_para_taverna2/taverna-workbench-2.5.0/engine/net.sf.taverna.t2.activities/wsdlsir/src/test/java/net/sf/taverna/t2/activities/wsdlsir/WSRFActivityTest.java
+/home/pol/workspace_para_taverna2/taverna-workbench-2.5.0/engine/net.sf.taverna.t2.activities/wsdlsir/src/test/java/net/sf/taverna/t2/activities/wsdlsir/xmlsplitter/XMLInputSplitterActivityTest.java
+/home/pol/workspace_para_taverna2/taverna-workbench-2.5.0/engine/net.sf.taverna.t2.activities/wsdlsir/src/test/java/net/sf/taverna/t2/activities/wsdlsir/xmlsplitter/AddXMLSplitterEditTest.java
+/home/pol/workspace_para_taverna2/taverna-workbench-2.5.0/engine/net.sf.taverna.t2.activities/wsdlsir/src/test/java/net/sf/taverna/t2/activities/wsdlsir/xmlsplitter/XMLSplitterConfigurationBeanBuilderTest.java
+/home/pol/workspace_para_taverna2/taverna-workbench-2.5.0/engine/net.sf.taverna.t2.activities/wsdlsir/src/test/java/net/sf/taverna/t2/activities/wsdlsir/security/SecureServicesInvokerTest.java

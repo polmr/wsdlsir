@@ -1,1 +1,0 @@
-../../a4gaswebservices/trunk/documentation/user_guide.wsdlsirplugin.rst

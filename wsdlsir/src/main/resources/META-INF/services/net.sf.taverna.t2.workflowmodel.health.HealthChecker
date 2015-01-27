@@ -1,0 +1,4 @@
+net.sf.taverna.t2.activities.wsdlsir.WSDLActivityHealthChecker
+net.sf.taverna.t2.activities.wsdlsir.xmlsplitter.XMLOutputSplitterHealthChecker
+net.sf.taverna.t2.activities.wsdlsir.xmlsplitter.XMLInputSplitterHealthChecker
+net.sf.taverna.t2.activities.wsdlsir.WSDLActivityDescriptorChecker
