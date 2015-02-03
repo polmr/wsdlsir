@@ -276,9 +276,6 @@ public class CallPreparator {
 		} catch (Exception e) {
 			//System.err.println(e.toString());
 			e.printStackTrace();
-//			String message = "\"The Comedy of Errors\"\n"
-//			        + "is considered by many scholars to be\n"
-//			        + "the first play Shakespeare wrote";
 			String message = "Something went wrong trying to accomplish SAML Web SSO protocol. "
 					+ "\n"
 					+ "If the problem persists, use the option -DDEBUG=true in the taverna "
