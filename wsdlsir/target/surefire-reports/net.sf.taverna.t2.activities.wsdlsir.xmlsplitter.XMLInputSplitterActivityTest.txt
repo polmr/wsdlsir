@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: net.sf.taverna.t2.activities.wsdlsir.xmlsplitter.XMLInputSplitterActivityTest
 -------------------------------------------------------------------------------
-Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.021 sec - in net.sf.taverna.t2.activities.wsdlsir.xmlsplitter.XMLInputSplitterActivityTest
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.025 sec - in net.sf.taverna.t2.activities.wsdlsir.xmlsplitter.XMLInputSplitterActivityTest
