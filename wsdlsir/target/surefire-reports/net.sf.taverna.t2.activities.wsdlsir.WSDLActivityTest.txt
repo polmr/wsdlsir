@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: net.sf.taverna.t2.activities.wsdlsir.WSDLActivityTest
 -------------------------------------------------------------------------------
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 5, Time elapsed: 0.038 sec - in net.sf.taverna.t2.activities.wsdlsir.WSDLActivityTest
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 5, Time elapsed: 0.053 sec - in net.sf.taverna.t2.activities.wsdlsir.WSDLActivityTest

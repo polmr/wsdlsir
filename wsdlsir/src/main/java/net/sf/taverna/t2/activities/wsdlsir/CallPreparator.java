@@ -65,8 +65,12 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.log4j.Logger;
 import org.xml.sax.SAXException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.net.URLDecoder;
 
 /**
  * 
@@ -139,6 +143,14 @@ public class CallPreparator {
 			nivel=0;
 			String newURL=endpoint;
 			do{
+				try {
+					//newURL = URLDecoder.decode(newURL, "UTF-8");
+					//newURL = newURL.replace("%20"," ");
+					//newURL = URLEncoder.encode(newURL, "UTF-8");
+			     } catch (Exception e) {
+			         // TODO Auto-generated catch block
+			         e.printStackTrace();
+			     }
 
 				if (debug)
 					System.out.println(nivel+"-->"+" Accessing: " + newURL);
@@ -151,14 +163,11 @@ public class CallPreparator {
 					throw new Exception(" Timeout exceeded accesing: "+newURL);
 				}
 				
-				
-				
-				
 				if (debug)
 					System.out.println(nivel+"->"+"returned="+returned);
 				
 				if (debug)
-					System.out.println(nivel+"->" + " DEVUELTO: "+returned.getStatus()+ " + AL acceder a: "+oldURL);
+					System.out.println(nivel+"->" + " DEVUELTO: STATUS="+returned.getStatus()+ " + AL acceder a: "+oldURL);
 				
 				//PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter("pirulo.txt", true)));
 				//writer.println(nivel+"->" + " DEVUELTO: "+returned.getStatus()+ " + AL acceder a: "+oldURL);
@@ -331,7 +340,8 @@ public class CallPreparator {
 				method.addParameter(e.getKey(),e.getValue());
 			}
 		}
-			
+		
+		method.setRequestHeader("User-Agent", "CallPreparatorAgent"); //this prevents some Idps from failing (they might reject a petition with no user-agent header)
 		
 		method.setFollowRedirects(false); //ESTO PARA CONTROLAR A MANO LO QUE HACE (tal vez se pueda dejar que lo haga solo)!!
 		
@@ -385,7 +395,7 @@ public class CallPreparator {
 
 		return toret;
 	}
-
+	
 	 private static void addParameters_from_response_form(PostMethod method,
 			String responseBodyAsString) {
 		 Pattern namepatter = Pattern.compile("name=\"([a-zA-Z]*)\"");
