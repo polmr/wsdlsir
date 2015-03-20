@@ -5,23 +5,22 @@ import java.util.Map;
 
 import javax.swing.*;
  
+/**
+ * This class represents a dialog that prompts the user for a selection within different options (Idps)
+ * @author Pablo Martin
+ *
+ */
 public class SelectDialog extends JDialog {
   public JLabel InstructionsLabel1 = new JLabel();
   public JLabel selectLabel = new JLabel();
-  public JComboBox idpSelect;// = new JComboBox();
-//  public JButton SendRecoveryCode = new JButton();
-//  public JLabel InstructionsLabel2 = new JLabel();
-//  public JLabel RecoveryCodeLabel = new JLabel();
-//  public JTextField RecoveryCode = new JTextField();
-//  public JLabel confirmPasswordLabel = new JLabel();
-//  public JPasswordField confirmPasswordField = new JPasswordField();
+  public JComboBox idpSelect;
   public JButton OkButton = new JButton();
   public JButton CancelButton = new JButton();
   
   
   private boolean canceled = false;
  
-  public SelectDialog(java.awt.Frame parent, boolean modal, Map<String,String> opciones, String mensaje, String titulo) {
+  public SelectDialog(java.awt.Frame parent, boolean modal, Map<String,String> options, String mensaje, String title) {
     super(parent, modal);
  
     setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -30,9 +29,9 @@ public class SelectDialog extends JDialog {
  
     setResizable(false);
  
-    InstructionsLabel1.setText("<html>Seleccione proveedor de identidad "
-    		+ "para "
-    		+ titulo
+    InstructionsLabel1.setText("<html>Select  identity provider "
+    		+ "for "
+    		+ title
     		+ "."
     		+ "<p>"
     		+ mensaje
@@ -41,23 +40,10 @@ public class SelectDialog extends JDialog {
  
     
     
-    idpSelect = new JComboBox(opciones.keySet().toArray());
-//    		studentGrades.keySet()
+    idpSelect = new JComboBox(options.keySet().toArray());
     selectLabel.setLabelFor(idpSelect);
     selectLabel.setText("Identity Provider:");
     
-    
- 
-//    SendRecoveryCode.setText("Send Recovery Code");
- 
-//    InstructionsLabel2.setText("<html>When you have received your recovery code, enter it into the space provided, enter your new password twice and then click <strong>Change Password</strong>.</html>");
-// 
-//    RecoveryCodeLabel.setLabelFor(RecoveryCode);
-//    RecoveryCodeLabel.setText("Recovery Code:");
- 
-//    confirmPasswordLabel.setLabelFor(confirmPasswordField);
-//    confirmPasswordLabel.setText("Confirm Password:");
- 
     OkButton.setText("Ok");
     OkButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent ae){
@@ -91,23 +77,15 @@ public class SelectDialog extends JDialog {
     layout.setHorizontalGroup(
       layout.createParallelGroup()
       .addComponent(InstructionsLabel1, 450, 450, 450)
-//      .addComponent(InstructionsLabel2, 450, 450, 450)
       .addGroup(
         layout.createSequentialGroup()
         .addGroup(
           layout.createParallelGroup()
           .addComponent(selectLabel)
-//          .addComponent(RecoveryCodeLabel)
-//          .addComponent(passwordLabel)
-//          .addComponent(confirmPasswordLabel)
         )
         .addGroup(
           layout.createParallelGroup()
           .addComponent(idpSelect)
-//          .addComponent(RecoveryCode)
-//          .addComponent(passwordField)
-//          .addComponent(confirmPasswordField)
-//          .addComponent(SendRecoveryCode)
           .addGroup(
             layout.createSequentialGroup()
             .addComponent(OkButton)
@@ -125,23 +103,6 @@ public class SelectDialog extends JDialog {
         .addComponent(selectLabel)
         .addComponent(idpSelect)
       )
-//      .addComponent(SendRecoveryCode)
-//      .addComponent(InstructionsLabel2)
-//      .addGroup(
-//        layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-//        .addComponent(RecoveryCodeLabel)
-//        .addComponent(RecoveryCode)
-//      )
-//      .addGroup(
-//        layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-//        .addComponent(passwordLabel)
-//        .addComponent(passwordField)
-//      )
-//      .addGroup(
-//        layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-//        .addComponent(confirmPasswordLabel)
-//        .addComponent(confirmPasswordField)
-//      )
       .addGroup(
         layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
         .addComponent(OkButton)

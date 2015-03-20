@@ -76,14 +76,6 @@ public class WSDLActivity extends
 	private String endpointReferenceInputPortName;
 
 	
-//	private static Map<String,HandlerConCookies> myhandlers = null; //TODO: vovler a poner private o quitar de aqui directamente 
-//	// extrañamente esto ha de ser static. 
-//	// Entiendo que es distinto el objeto que se instancia cuadno se añade un servico al WF
-//	// que cuando se ejecuta
-
-	
-	
-	
 	public boolean isWsrfService() {
 		return isWsrfService;
 	}
@@ -112,9 +104,6 @@ public class WSDLActivity extends
 			try {
 				parseWSDL();
 				configurePorts();
-				
-				
-				//configureFederation(false); //TODO: borrar contenido?
 			} catch (Exception ex) {
 				throw new ActivityConfigurationException(
 						"Unable to parse the WSDL " + bean.getWsdl(), ex);
@@ -123,8 +112,6 @@ public class WSDLActivity extends
 	}
 	
 	
-	
-
 	/**
 	 * @return a {@link WSDLActivityConfigurationBean} representing the
 	 *         WSDLActivity configuration
@@ -263,32 +250,6 @@ public class WSDLActivity extends
 		outputDepth.put("attachmentList", Integer.valueOf(1));
 	}
 	
-	
-//	private void configureFederation(boolean force) {
-//		
-////		HandlerConCookies ahandler=myhandlers.get(call.getTargetEndpointAddress());
-////		ahandler=CallPreparator.createHandlerForCallToEndpoint(endpoint);
-////		myhandlers.put(call.getTargetEndpointAddress(),ahandler);
-//		
-//		if (myhandlers==null || force)
-//		{
-//			myhandlers= new HashMap<String,HandlerConCookies>();
-//			
-//			List<String> endpoints = parser
-//			.getOperationEndpointLocations(configurationBean.getOperation());
-//			for (String endpoint : endpoints) {
-//				System.out.println(" YUJU en configureFederation:"+endpoint);
-//	
-//	//			HandlerConCookies ahandler=CallPreparator.createHandlerForCallToEndpoint(endpoint);
-//				
-//				HandlerConCookies ahandler=myhandlers.get(endpoint);
-//				if (ahandler==null)
-//					ahandler=CallPreparator.createHandlerForCallToEndpoint(endpoint);
-//				myhandlers.put(endpoint,ahandler);
-//				}
-//		}
-//	}
-
 
 	/**
 	 * {@inheritDoc}

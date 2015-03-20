@@ -2,16 +2,6 @@ package net.sf.taverna.t2.activities.wsdlsir;
 
 import javax.xml.namespace.QName;
 
-
-//import java.io.PrintWriter;
-//import java.io.BufferedWriter;
-//import java.io.FileWriter;
-
-
-
-
-
-
 import java.awt.Dimension;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -78,28 +68,28 @@ import java.net.URLDecoder;
  *
  */
 public class CallPreparator {
-	
+	/**
+	 * We use a flag to determine whether to write out some debug information.
+	 * The user can use "-DDEBUG=true" as java option to enable debuggin 
+	 */
 	public static final boolean debug = Boolean.getBoolean("DEBUG");
 
-	
-//	private static int nivel=0; //TODO: que esto no sea variable estatica, sino que se cree en prperaecall y se pase entre los demas
 
-	 /**
-	  * Prepara una call para poder acceder a servicio protegido por shibboleth.
-	  * La idea es que intente acceder a la URL del servicio, y que responda a las redirecciones que reciba y a los formularios con los datos que sean necesarios
-	  * Forwardea las cookies, igual que haría el navegador. 
-	  * Finalmente añade un handler a la call para que a la hora de invocar, se establezcan las cookies que se han obtenido de la sessión shibboleth
-	  * 	-> En realidad solo nos interesa la cookie _shibsession_XXXXXX
-	  * 
-	  * NOTA FUTURO: cuando usemos SirDemo, para simular el formulario del WAYF, es interesante tomar como referencia la web de SirDemo deshabilitando JAVASCRIPT
-	  * @deprecated
-	  * @param call
-	  * @param username
-	  * @param password
-	  * @param idpURLAuthForm Cuando reciba esta URL hará un POST con el user y pass que se le pasen
-	  * @return un HandlerConCookies, que puede usarse para que otras calls también usen la cookie de turno 
-	  */
-//	 public static HandlerConCookies prepareCall4Shib(Call call, String username, String password, String idpURLAuthForm) {
+	/**
+	 * Prepares a org.apache.axis.client.Call to be able to access a web service service protected with shibboleth (SAML Web SSO Profile)
+	 * 
+	 * The idea is that the URL to the service is accessed (before the actual service invocation), and the behaviour of a brower is mimiced:
+	 * redirection, autosubmitting forms, cookies forwarding, and also forms with inputs for the users are presented (via GUI).
+	 * The goal is to obtain the cookie session for shibboleth autentication.
+	 * 
+	 * In the end, a handler is appended to the call, so that when the final invocation is performed, the cookies obtained (namely _shibsession_XXXXX cookie),
+	 * are sent with the call.  
+	 * 
+	 * @deprecated
+	 * @param call the call to prepare
+	 * @param mihandler a handler (if a non null value is received, this handler is set (the algorithm does not take place)
+	 * @return a HandlerConCookies, a handler for the call, that will override the invoke method in order to include the cookies 
+	 */
 	public static HandlerConCookies prepareCall4Shib(Call call, HandlerConCookies mihandler) {
 		if (debug)
 			System.out.println(" en prepareCall4Shib . mihandler="+mihandler);
@@ -115,7 +105,17 @@ public class CallPreparator {
 		 return mihandler;
 	 }
 	
-	//deprecated //TODO: docstrings!
+	 /**
+	  * Creates a handler that can be asigned to a a org.apache.axis.client.Call to be able to access a web service service protected with shibboleth (SAML Web SSO Profile)
+	  * 
+	  * The idea is that the URL to the service is accessed (before the actual service invocation), and the behaviour of a brower is mimiced:
+	  * redirection, autosubmitting forms, cookies forwarding, and also forms with inputs for the users are presented (via GUI).
+	  * The goal is to obtain the cookie session for shibboleth autentication.
+	  * 
+	  * @deprecated
+	  * @param endpoint the URL of the protected service
+	  * @return a HandlerConCookies, a handler for a call, that will override the invoke method in order to include the cookies 
+	  */
 	public static HandlerConCookies createHandlerForCallToEndpoint(String endpoint)
 	{
 		HandlerConCookies mihandler= new HandlerConCookies();
@@ -124,13 +124,23 @@ public class CallPreparator {
 		return mihandler;
 	}
 	
-	
+	/**
+	 * Returns the cookies obtained when a web service service protected with shibboleth (SAML Web SSO Profile) is addressed.
+	 * 
+	 * The idea is that the URL to the service is accessed, and the behaviour of a brower is mimiced:
+	 * redirection, autosubmitting forms, cookies forwarding, and also forms with inputs for the users are presented (via GUI).
+	 * The goal is to obtain the cookie session for shibboleth autentication.
+	 * 
+	 * 
+	 * @param endpoint the URL of the protected service
+	 * @return an array of Cookies obtained. 
+	 */
 	public static Cookie [] createCookieForCallToEndpoint(String endpoint)
 	{
-		Integer nivel=new Integer(0);
+		Integer level=new Integer(0);
 
 		try{
-			HttpClient client = new HttpClient(); // este cliente va a gestionar las cookies automáticamente. Va a ser nuestro "browser"
+			HttpClient client = new HttpClient(); // This client will deal with cookies automatically. It will be our "browser"
 			client.getParams().setConnectionManagerTimeout(5000);
 			client.getParams().setSoTimeout(5000);
 			client.getHttpConnectionManager().getParams().setConnectionTimeout(5000); 
@@ -140,85 +150,77 @@ public class CallPreparator {
 			ResponseFromExecMethod returned=null;
 			Map<String,String> parameters=new HashMap<String, String>();
 			
-			nivel=0;
+			level=0;
 			String newURL=endpoint;
-			do{
-				try {
-					//newURL = URLDecoder.decode(newURL, "UTF-8");
-					//newURL = newURL.replace("%20"," ");
-					//newURL = URLEncoder.encode(newURL, "UTF-8");
-			     } catch (Exception e) {
-			         // TODO Auto-generated catch block
-			         e.printStackTrace();
-			     }
-
+			
+			//We have a loop that will perform different HTTP methods, mimicing what the browser would do.
+			do{ 
 				if (debug)
-					System.out.println(nivel+"-->"+" Accessing: " + newURL);
+					System.out.println(level+"-->"+" Accessing: " + newURL);
 				String oldURL=newURL;
 				
 				try{
-					returned=ejecutaMetodo(client, newURL,parameters, nivel);
+					returned=ejecutaMetodo(client, newURL,parameters, level);
 				}
 				catch (ConnectTimeoutException e){
 					throw new Exception(" Timeout exceeded accesing: "+newURL);
 				}
 				
 				if (debug)
-					System.out.println(nivel+"->"+"returned="+returned);
+					System.out.println(level+"->"+"returned="+returned);
 				
 				if (debug)
-					System.out.println(nivel+"->" + " DEVUELTO: STATUS="+returned.getStatus()+ " + AL acceder a: "+oldURL);
-				
-				//PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter("pirulo.txt", true)));
-				//writer.println(nivel+"->" + " DEVUELTO: "+returned.getStatus()+ " + AL acceder a: "+oldURL);
-				//writer.close();
+					System.out.println(level+"->" + " RETURNED: STATUS="+returned.getStatus()+ " + Accessing to: "+oldURL);
 				
 				parameters.clear();
 
 				status = returned.getStatus();
-				if (status==301 || status==302 || status==303) //REDIRECT: obtenemos la URL de las cabeceras
+				if (status==301 || status==302 || status==303) //REDIRECT: we get the redirect URL from the headers
 				{
 					newURL= returned.getRedirectLocation();
 					if (debug)
-						System.out.println(" cambiando url por culpa de redirect a:" + newURL);
+						System.out.println(" changing URL due to a redirect to:" + newURL);
 
 				}
-				else if (status == 200) //OK: obtenemos la URL del formulario que se nos muestre
+				else if (status == 200) //OK: we need to get the URL from the presented form
 				{
-					// A - Obtenemos nueva URL
+					// A - Get new URL from form
 					newURL= getLocationFromForm(returned.getResponseBody());
-					//TODO: mejorar seleccion de action (en caso de varios forms!)
-					// NOTA: posibilidad de usar xpath para parsear el contenido html.
+					//TODO: Enhance the selection of the action (in case of several forms)
+					//NOTE: xpath could be used to parse HTML contents
 
 					if (debug)
-						System.out.println(" LOCATION FROM FORM= "+newURL);//TODO: DELETE
+						System.out.println(" LOCATION FROM FORM= "+newURL);
 
-					if (newURL==null || "".equals(newURL) || oldURL.endsWith(newURL)) // si no hay un form con otro action, repetiremos la URL a la que estabamos queriendo acceder
+					if (newURL==null || "".equals(newURL) || oldURL.endsWith(newURL)) //if there is action is found in a form, we will use the previous URL (so does a browser) 
 						newURL=oldURL;
-					else // usamos la url que tenemos en el action del form 
+					else // we use the URL from the action 
 					{
-						if (newURL.startsWith("/") ) //si la ruta es relativa, copiamos la ruta base en la que estabamos.
+						//if a relative path is given, we use the base URL we were using and append the relative path
+						if (newURL.startsWith("/") ) // if it starts with "/", we will not append "/" 
 							newURL = oldURL.substring(0, oldURL.lastIndexOf('/'))+newURL;
-						else if (! newURL.startsWith("http") ) // copiamos la ruta base en la que estabamos.
+						else if (! newURL.startsWith("http") ) // we will need an extra "/"
 							newURL = oldURL.substring(0, oldURL.lastIndexOf('/'))+"/"+newURL;
 
 						if (debug)
-							System.out.println(" cambiando url por culpa de formulario a:" + newURL +" de:" + oldURL);
+							System.out.println(" changing URL due to a form to:" + newURL +" from:" + oldURL);
 					}
 
 					String responseBody = returned.getResponseBody();
 
-					// B - cogemos los parameters hidden con sus valores para reenviarlos en nueva petición POST
-//					System.out.println(" BUSCANDO parametros hidden en cuerpo devuelto por "+ oldURL+ " CUERPO="+responseBody);
+					// B - we will gather the hidden inputs in order to re-sent them in a new POST pettition. 
 					parameters=getParameters_from_response_form(responseBody);
-//					System.out.println(" ---> se han encontrado "+parameters.size()+"parametros hidden en cuerpo devuelto por "+ oldURL);
+					//System.out.println(" ---> found "+parameters.size()+" hidden parameters in responseBody from "+ oldURL); //too verbose
 
-					// incluímos los parámetros 
-					//          		if (newURL.contains(WAYFURL))
-					if (responseBody.contains("name=\"PAPIHLI\""))
+					//this tricks helps determines that the URL corresponds to SIR's WAYF.
+					//TODO: In order to work with other federations similar stuff must be considered
+					if (responseBody.contains("name=\"PAPIHLI\"")) 
 					{
+						// We would offer a dialog to let the user select which Idp requires.
+						// TODO: this solution is only suitable for taverna-workbench as it is an interactive solution.
+						
 						Map<String,String> opciones = getOptionsFromSelect("PAPIHLI",responseBody);
-						// Create an instance of the select
+						// Create an instance of the select dialog
 						SelectDialog selectDialog = new SelectDialog( new JFrame(),true,opciones,"", endpoint);
 						selectDialog.setModal(true);
 						selectDialog.setVisible(true);
@@ -227,18 +229,20 @@ public class CallPreparator {
 							break;
 
 						if (debug)
-							System.out.println("se ha seleccionado:"+selectDialog.idpSelect.getSelectedItem().toString());
-						//          				System.exit(1); //TODO: delete
+							System.out.println("Idp selected:"+selectDialog.idpSelect.getSelectedItem().toString());
+						
+						// add the parameter with the option selected
 						parameters.put("PAPIHLI", opciones.get(selectDialog.idpSelect.getSelectedItem()));
-						//          			parameters.put("PAPIHLI", "FCSCLsirAS");
-
 
 					}
-					//          		if (newURL!=null && newURL.contains(finalIdpURL))
+					
+					// We do this trick to determine that the response correspond to an Idp user/pass form. 
+					// TODO: this has been successfully tested in some IDPs, but SAML Web SSO does not determine the implementation of those. 
+					//   therefore, a generic implementation is unlikely, but some more Idps could be tested
 					if (parameterInResponseBody("sso_pass",responseBody) || parameterInResponseBody("password",responseBody) || parameterInResponseBody("j_password",responseBody) )
 					{
-						//          			System.out.println(" COMPARANDO newURL="+newURL+ " con OLD="+oldURL);
-						String mensaje = newURL.equals(oldURL)?"VOLVIENDO A PEDIR (tal vez fuera incorrecta)":"";
+						
+						String mensaje = newURL.equals(oldURL)?"NEW PETITION (maybe credentials given were incorrect)":"";
 
 						// Create an instance of the test dialog
 						TestDialog testDialog = new TestDialog( new JFrame(),true, mensaje);
@@ -264,18 +268,18 @@ public class CallPreparator {
 				}
 				else
 				{
-					System.err.println("bucle terminado sin llegar a puerto. status="+status+ " al acceder a "+oldURL);
-					newURL=null; // no queremos seguir
-					throw new Exception("bucle terminado sin llegar a puerto. status="+status+ " al acceder a "+oldURL);
+					System.err.println("loop finish unsucessfully. status="+status+ " accessing "+oldURL);
+					newURL=null; // We do not want to continue
+					throw new Exception("loop finish unsucessfully. status="+status+ " accessing "+oldURL);
 					
 				}
 
-				if (nivel>25) // demasiadas iteraciones (prevencion de bucle infinito)
+				if (level>25) // too much iterations (preventing infinite loop)
 				{
-					System.err.println("Tras "+nivel+ " iteraciones, no hemos llegado a puerto. Forzamos cancelacion");
+					System.err.println("After "+level+ " iterations, we have been not succesfull. Cancellation forced");
 					newURL=null;
 				}
-				nivel++;
+				level++;
 			} while (status !=null && newURL!=null && !endpoint.equals(newURL) );
 
 			
@@ -317,18 +321,20 @@ public class CallPreparator {
 	}
 
 	/**
-	 * Crea y genera un PostMethod a ejecutar usando un HttpClient. Recibe la URL y los parámetros (POST) que se le van a pasar.
-	 * Guarda los resultados (redirecciones/cookies/status/responsebody) en una variable ResponseFromExecMethod que devuelve
-	 * @param client
-	 * @param destiny
-	 * @param parametros
-	 * @return los resultados (redirecciones/cookies/status/responsebody) en una variable ResponseFromExecMethod
+	 * Creates a PostMethod to be executed using an HttpClient. Receives the URL and (POST) parameters to be passed along.
+	 * Saves the results (redirects/cookies/status/responsebody) in a ResponseFromExecMethod variable that will be returned
+	 * 
+	 * @param client HttpClient client
+	 * @param destiny destiny URL
+	 * @param parametros parameters
+	 * @param level number of invocation. Used for debugging information.
+	 * @return the results (redirects/cookies/status/responsebody) in a ResponseFromExecMethod variable
 	 * @throws IOException
 	 * @throws HttpException
 	 */
-	private static ResponseFromExecMethod ejecutaMetodo(HttpClient client, String destiny, Map<String,String> parametros, Integer nivel) throws IOException, HttpException {
-		nivel++;
-		ResponseFromExecMethod toret= new ResponseFromExecMethod(nivel);
+	private static ResponseFromExecMethod ejecutaMetodo(HttpClient client, String destiny, Map<String,String> parametros, Integer level) throws IOException, HttpException {
+		level++;
+		ResponseFromExecMethod toret= new ResponseFromExecMethod(level);
 
 		
 		PostMethod method = new PostMethod(destiny);
@@ -343,9 +349,9 @@ public class CallPreparator {
 		
 		method.setRequestHeader("User-Agent", "CallPreparatorAgent"); //this prevents some Idps from failing (they might reject a petition with no user-agent header)
 		
-		method.setFollowRedirects(false); //ESTO PARA CONTROLAR A MANO LO QUE HACE (tal vez se pueda dejar que lo haga solo)!!
+		method.setFollowRedirects(false); // to control redirections
 		
-		//POR ALGUNA EXTRAÑA RAZON, CUANDO HAY VARIAS COOKIES en CLIENT; no parecen llegar en la llamada. POR eso podemos forzarlo "a mano" la inclusion en el metodo
+		// For some odd reason, when there are several cookies in the client, they do not seem to reach the method call. Thus, we force the inclusion in the method
 		String newcookie = "";
 		
 		if (method.getRequestHeader("Cookie")!=null)
@@ -363,31 +369,36 @@ public class CallPreparator {
 		method.setRequestHeader("Cookie",newcookie);
 
 		
-		
+		//do the actual execution
 		int status = client.executeMethod(method);
+		
 		if (debug)
-			System.out.println(" justo TRAS acceder a method");
+			System.out.println(" justo after accesing method");
+		
+		//save the status
 		toret.setStatus(status);
-//		System.out.println(nivel+"->"+" leido status =" +status+ " accediendo a "+ destiny+"\n\t con cookies="+method.getRequestHeader("cookie"));
+
 		Header redirectlocationHeader = method.getResponseHeader("location");
-		if (redirectlocationHeader != null) {
+		if (redirectlocationHeader != null) {//if a redirection is given, we gather the cookies from the response "set-cookie" headers. 
+
 			String redirectLocation = redirectlocationHeader.getValue();
+			//save redirect location
 			toret.setRedirectLocation(redirectLocation);
 			if (method.getResponseHeader("set-cookie")!=null)
 			{
 				if (debug)
-					System.out.println("setting cookies: "+ method.getResponseHeader("set-cookie")); //TODO: delete);
+					System.out.println("setting cookies: "+ method.getResponseHeader("set-cookie"));
+				//save the cookies
 				toret.setCookies(method.getResponseHeader("set-cookie"));
 			}
-
-		} else {
-//			toret.setResponseBody(method.getResponseBodyAsString());
+		} else { // we gather the response body to be returned
 			BufferedReader br = new BufferedReader(new InputStreamReader(method.getResponseBodyAsStream()));
 			StringBuilder sb = new StringBuilder();
 			String readLine;
 			while(((readLine = br.readLine()) != null)) {
 				sb.append(readLine+"\n");
 			}
+			//save the body
 			toret.setResponseBody(sb.toString());
 		}
 		
@@ -396,57 +407,16 @@ public class CallPreparator {
 		return toret;
 	}
 	
-	 private static void addParameters_from_response_form(PostMethod method,
-			String responseBodyAsString) {
-		 Pattern namepatter = Pattern.compile("name=\"([a-zA-Z]*)\"");
-		 Pattern valuepattern = Pattern.compile("value=\"(.*)\"");
-
-		 
-		 String[] lines = responseBodyAsString.split(System.getProperty("line.separator"));
-		 for (String line: lines)
-		 {
-			 if (line.contains("type=\"hidden\"") )
-			 {
-				 
-				 Matcher mname = namepatter.matcher(line);
-
-				 if (mname.find()) {
-					 String name = mname.group(1);
-					 if (debug)
-							System.out.println( " encontrado parametro=" + name + " -> en linea"+ line);
-//					 SafeHtmlUtils.fromString(s);
-
-					 
-					 Matcher mvalue = valuepattern.matcher(line);
-
-					 if (mvalue.find()) {
-						 String value = mvalue.group(1);
-						 if (debug)
-								System.out.println( " encontrado value=" + value + " -> en linea"+ line);
-//						 System.out.println( " unescaped value=" + unescapeJavaString(value) + " -> en linea"+ line);
-						 value=value.replaceAll("&#x3a;",":");
-						 if (debug)
-								System.out.println( " replaced value=" + value );
-
-						 method.addParameter(name, value);
-						 
-					 }
-					 
-				 }
-				 
-			 }
-			 
-		 }
-		
-	}
-
+	//TODO: seguir por aqui comentarios y por SelectDialog y demas....
 
 	 /**
-	  * Devuelve un mapa de parametros (key,value) a partir de un contenido html.
-	  * Escanea el cuerpo del contenido y devuelve el valor de los input hidden.
+	  * Returns the parameters in a map (key,value) parsing the contents of an HTML response
+	  * gathering the hidden inputs.
 	  * 	 
-	  * @param responseBodyAsString el contenido html que se desea parsear
-	  * @return los inputs hidden con sus valores
+	  * TODO The parsing is done by lines, so depending on the html structure
+	  * this method would fail. xpath could be used to parse HTML contents.
+	  * @param responseBodyAsString the html content to parse
+	  * @return the hidden inputs with their values
 	  */
 	 private static Map<String,String> getParameters_from_response_form( String responseBodyAsString) {
 		 
@@ -461,25 +431,18 @@ public class CallPreparator {
 			 {
 				 if (line.contains("type=\"hidden\"") )
 				 {
-//					 System.out.println( " leyendo linea en response "+ line);
-
 					 Matcher mname = namepatter.matcher(line);
 
 					 if (mname.find()) {
 						 String name = mname.group(1);
-//						 System.out.println( " encontrado parametro en response =" + name + " -> en linea"+ line);
-//						 SafeHtmlUtils.fromString(s);
-
 						 
 						 Matcher mvalue = valuepattern.matcher(line);
 
 						 if (mvalue.find()) {
 							 String value = mvalue.group(1);
-//							 System.out.println( " encontrado value=" + value + " -> en linea"+ line);
-//							 System.out.println( " unescaped value=" + unescapeJavaString(value) + " -> en linea"+ line);
-							 value=value.replaceAll("&#x3a;",":");
-//							 System.out.println( " replaced value=" + value );
-//							 System.out.println( "\t\t adding parametro en response =" + name + " -> "+ value);
+							 
+							 //we need to aply some correction with some characters codification (TODO: a general solution might be necessary as similar problems may occur)
+							 value=value.replaceAll("&#x3a;",":"); 
 							 toret.put(name, value);
 						 }
 
@@ -494,13 +457,13 @@ public class CallPreparator {
 		}
 	 
 	 /**
-	  * Devuelve un mapa de opciones (key,value) a partir de un contenido html.
-	  * Escanea el cuerpo del contenido y devuelve el valor de los options
-	  *  dentro de un select que recibe como parametro.
+	  * Returns a Map (key,value) with options from an html response body 
+	  * parsing the contents. It looks for the options within a select element (received as parameter)
+	  * 
 	  * 	 
-	  * @param select name de el select que contiene las opciones
-	  * @param responseBodyAsString el contenido html que se desea parsear
-	  * @return
+	  * @param select name from the select with the options
+	  * @param responseBodyAsString the html content to parse
+	  * @return the map with the options in the select
 	  */
 	 private static Map<String,String> getOptionsFromSelect( String select, String responseBodyAsString) {
 		 
@@ -510,8 +473,6 @@ public class CallPreparator {
 //			 Pattern optionpattern = Pattern.compile("<option");
 			 Pattern namepattern = Pattern.compile(">([^<]*)<");
 
-
-			 
 			 String[] lines = responseBodyAsString.split(System.getProperty("line.separator"));
 			 for (String line: lines)
 			 {
@@ -522,8 +483,7 @@ public class CallPreparator {
 					 if (mname.find()) {
 						 String name = mname.group(1);
 						 if (debug)
-								System.out.println( " encontrado option. name=" + name + " -> en linea"+ line);
-//						 SafeHtmlUtils.fromString(s);
+								System.out.println( " found option. name=" + name + " -> in linewether"+ line);
 
 						 
 						 Matcher mvalue = valuepattern.matcher(line);
@@ -531,8 +491,9 @@ public class CallPreparator {
 						 if (mvalue.find()) {
 							 String value = mvalue.group(1);
 							 if (debug)
-									System.out.println( " encontrado value=" + value + " -> en linea"+ line);
-//							 System.out.println( " unescaped value=" + unescapeJavaString(value) + " -> en linea"+ line);
+									System.out.println( " found value=" + value + " -> in line: "+ line);
+							 // we need to aply some correction with some characters codification (TODO: a general solution might be necessary as similar problems may occur)
+							 // SafeHtmlUtils.fromString(s); //I think this does not work
 							 value=value.replaceAll("&#x3a;",":");
 							 if (debug)
 									System.out.println( " replaced value=" + value );
@@ -550,17 +511,14 @@ public class CallPreparator {
 	 
 	 
 	 /**
-	  * Devuelve si existe algún input con name="parameter"
-	  * @param parameter nombre del parametro
-	  * @param responseBodyAsString contenido html donde buscar
-	  * @return si se el cuerpo contiene tal parametro
+	  * Returns if an input with certain name if found in the body contents
+	  * @param parameter the name of the parameter
+	  * @param responseBodyAsString the html content to parse
+	  * @return whether the body contains such parameter
 	  */
 	 private static boolean parameterInResponseBody( String parameter, String responseBodyAsString) 
 	 {
-		 
 			 Pattern namepatter = Pattern.compile("name=\""+parameter+"\"");
-//			 Pattern valuepattern = Pattern.compile("value=\"(.*)\"");
-
 			 
 			 String[] lines = responseBodyAsString.split(System.getProperty("line.separator"));
 			 for (String line: lines)
@@ -569,9 +527,8 @@ public class CallPreparator {
 				 {
 					 Matcher mname = namepatter.matcher(line);
 					 if (mname.find()) {
-//						 String name = mname.group(1);
 						 if (debug)
-								System.out.println( " encontrado parametro!=" + parameter + " -> en linea"+ line);
+								System.out.println( " found parameter!=" + parameter + " -> in line: "+ line);
 						 return true;
 					 }
 				 }
@@ -580,7 +537,17 @@ public class CallPreparator {
 		}
 	 
 	 
-
+	 /**
+	  * Returns the location of of the action in the forms an http body
+	  * Some Idps might have addicional forms (besides the user/pass one). 
+	  * 
+	  * We need to ensure that the action returned is that of the form with those inputs
+	  * TODO: this has been successfully tested in some IDPs, but SAML Web SSO does not determine the implementation of those. 
+	  *  therefore, a generic implementation is unlikely, but some more Idps could be tested
+	  * 
+	  * @param responseBodyAsString the html content to parse
+	  * @return the location on the action
+	  */
 	 private static String getLocationFromForm(String responseBodyAsString) {
 		 Pattern namepatter = Pattern.compile("action=\"([^\"]*)\"");
 		 
@@ -596,7 +563,7 @@ public class CallPreparator {
 				 Matcher mname = namepatter.matcher(line);
 				 if (mname.find()) {
 					 String action = mname.group(1);
-//					 System.out.println( " encontrado action=" + action + " -> en linea"+ line);
+					 // we need to aply some correction with some characters codification (TODO: a general solution might be necessary as similar problems may occur)
 					 newtoret=action.replaceAll("&#x3a;", ":").replaceAll("&#x2f;", "/");
 					 if (toret==null) toret=newtoret;
 				 }
@@ -618,22 +585,29 @@ public class CallPreparator {
 	}
 	 
 
+//  This was used to prevent sites protected using non valid certificates to fail. 
+//  I think that this is necessary for testing the code alone. When using this within taverna, the workbench will prompt for acceptation of certificates	 
+//
+//	 private static class DefaultTrustManager implements X509TrustManager {
+//
+//		 @Override
+//		 public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {}
+//
+//		 @Override
+//		 public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {}
+//
+//		 @Override
+//		 public X509Certificate[] getAcceptedIssuers() {
+//			 return null;
+//		 }
+//	 }
 
-
-	private static class DefaultTrustManager implements X509TrustManager {
-
-	        @Override
-	        public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {}
-
-	        @Override
-	        public void checkServerTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {}
-
-	        @Override
-	        public X509Certificate[] getAcceptedIssuers() {
-	            return null;
-	        }
-	    }
-
+	 /**
+	  * This class is used to hold information on the execution of an HTTP method.
+	  * 
+	  * @author Pablo Martin
+	  *
+	  */
 	private static class ResponseFromExecMethod
 	{
 		private Integer status;
@@ -642,11 +616,11 @@ public class CallPreparator {
 		private Header cookies;
 		private String responseBody;
 		
-		private Integer nivel;
+		private Integer level;
 
-		public ResponseFromExecMethod(Integer nivel) {
+		public ResponseFromExecMethod(Integer level) {
 			super();
-			this.nivel = nivel;
+			this.level = level;
 		}
 		public String getResponseBody() {
 			return responseBody;
@@ -682,13 +656,13 @@ public class CallPreparator {
 		public String toString(){
 			String toret="ResponseFromExecMethod ( "+" "+") \n";
 			if (status!=null)
-				toret+="\t"+nivel+"->"+"status: " + status+"\n";
+				toret+="\t"+level+"->"+"status: " + status+"\n";
 			if (redirectLocation!=null)
-				toret+="\t"+nivel+"->"+"redirect_to: " + redirectLocation+"\n";
+				toret+="\t"+level+"->"+"redirect_to: " + redirectLocation+"\n";
 			if (cookies!=null)
-				toret+="\t"+nivel+"->"+"cookies: " + cookies+"\n";
+				toret+="\t"+level+"->"+"cookies: " + cookies+"\n";
 			if (responseBody!=null)
-				toret+="\t"+nivel+"->"+"contents: " + responseBody+"\n";
+				toret+="\t"+level+"->"+"contents: " + responseBody+"\n";
 			toret+="-----------------------\n";
 
 

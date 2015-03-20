@@ -69,6 +69,11 @@ import org.jdom.output.DOMOutputter;
  * 
  */
 public class T2WSDLSOAPInvoker extends WSDLSOAPInvoker {
+	/**
+	 * We use a flag to determine whether to write out some debug information.
+	 * The user can use "-DDEBUG=true" as java option to enable debuggin 
+	 */
+	public static final boolean debug = Boolean.getBoolean("DEBUG");
 
 	private static final String REFERENCE_PROPERTIES = "ReferenceProperties";
 	private static final String ENDPOINT_REFERENCE = "EndpointReference";
@@ -78,8 +83,6 @@ public class T2WSDLSOAPInvoker extends WSDLSOAPInvoker {
 
 	private String wsrfEndpointReference = null;
 	
-	private static Map<String,HandlerConCookies> myhandlers = new HashMap<String,HandlerConCookies>();
-
 	public T2WSDLSOAPInvoker(WSDLParser parser, String operationName,
 			List<String> outputNames) {
 		super(parser, operationName, outputNames);
@@ -90,16 +93,6 @@ public class T2WSDLSOAPInvoker extends WSDLSOAPInvoker {
 		this(parser, operationName, outputNames);
 		this.wsrfEndpointReference = wsrfEndpointReference;
 	}
-//	public T2WSDLSOAPInvoker(WSDLParser parser, String operationName,
-//			List<String> outputNames, String wsrfEndpointReference,Map<String,HandlerConCookies> myhandlers) {
-//		this(parser, operationName, outputNames,myhandlers);
-//		this.wsrfEndpointReference = wsrfEndpointReference;
-//	}
-//	public T2WSDLSOAPInvoker(WSDLParser parser, String operationName,
-//			List<String> outputNames, Map<String,HandlerConCookies> myhandlers) {
-//		super(parser, operationName, outputNames);
-//		this.myhandlers=myhandlers;
-//	}
 	
 	@SuppressWarnings("unchecked")
 	protected void addEndpointReferenceHeaders(
@@ -213,46 +206,35 @@ public class T2WSDLSOAPInvoker extends WSDLSOAPInvoker {
 
 				CredentialManager credman = CredentialManager.getInstance();
 				
-				if (credman.containsAlias(CredentialManager.KEYSTORE, "password#" + new URI(endpoint).toASCIIString()) ){ //TODO: checkear que esto vaya feten
+				// we query the credential manager for the password (actually that would be the cookies)
+				if (credman.containsAlias(CredentialManager.KEYSTORE, "password#" + new URI(endpoint).toASCIIString()) ){ 
 					UsernamePassword usernamepass=credman.getUsernameAndPasswordForService(new URI(endpoint), false, "nomatter");
 					
+					//get the cookies from Credential Mangaer and put in on the handler
 					Cookie[] cookies = (Cookie[])deserializefromString(usernamepass.getPasswordAsString());
 					ahandler.setCookies( cookies);
 					
-					for (Cookie cookie : cookies) //TODO: delete
-					{
-						System.out.println(" en configureSecurity con profile=SAMLWEBSSOAUTH . cookie en cookies: "+cookie);
-					}
+					if (debug)
+						for (Cookie cookie : cookies) 
+						{
+							System.out.println(" in configureSecurity with profile=SAMLWEBSSOAUTH . cookie in cookies: "+cookie);
+						}
 					
+					//TODO: a failure due to a wrong cookie should be considered and a new handler should de obtained (if profile is SAMLWEBSSOAUTH...).
+					//HOW? a GET might do. maybe a "testconectivity(String endpoint, Cookie[] cookies)" method should be included in CallPreparator class
 				}
-				else // nothing on credential manager
+				else // nothing on credential manager, we perform the algorithm for obtaining a new one.  
 				{
-					System.out.println("Credential manager doesn't contain the session cookie");
+					System.out.println("Credential manager does not contain the session cookie");
 					Cookie[] cookiesTODAS= CallPreparator.createCookieForCallToEndpoint(endpoint);
 					ahandler.setCookies(cookiesTODAS);
+					
+					//Notice that unlike when the call is configured via UI, we do not save the cookies on the credential manager
 				}
+
+				// Finally we set the new handler to the call
 				call.setClientHandlers(ahandler, null);
-
 			}
-
-//			
-//			if (bean.getHandler()==null)
-//			{
-//				WSDLParser parser = new WSDLParser(bean.getWsdl()); 
-//				List<String> endpoints = parser.getOperationEndpointLocations(bean.getOperation());
-//				for (String endpoint : endpoints) //Actually i am only expecting one endpoint
-//				{
-//					System.out.println(" En configureSecurity para crear handler para endpoint:"+endpoint); //TODO: delete
-//	
-//					HandlerConCookies ahandler= new HandlerConCookies();
-//					ahandler.setCookies(CallPreparator.createCookieForCallToEndpoint(endpoint) );
-//					System.out.println(" setting beans handler to:"+ahandler.toString()); //TODO: delete
-//					bean.setHandler(ahandler);
-//				}
-//			}
-//			call.setClientHandlers(bean.getHandler(), null);
-			
-			//TODO: faltaría controlar fallo por culpa de que la cookie no funcionara y volver a conseguir un nuevo handler en ese caso (si el profile es SAML...)
 		}
 		else {
 			logger.error("Unknown security profile " + securityProfile);

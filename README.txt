@@ -31,6 +31,8 @@ In order to install WSDL SIR Plugin, we proceed this way:
 		 
 		
 4. We give a name to our new site and the URL:
+
+https://srv-prj-wsamiga-sir.fcsc.es/plugin/
 		
 5. Then click on Install
 		  

@@ -287,10 +287,15 @@ public class WSDLActivityConfigurationView extends HelpEnabledDialog implements 
 		mainPanel.add(SAMLSecurityAuthNRadioButton, gbc);
 		
 		ActionListener getCookieListener = new ActionListener() {
+			
+			/**
+			 * This listener will use the CallPreparator to obtain the cookies (included shibsession_XXX cookie) and 
+			 * save it in the Credential Manager (as the password for user "nomatter")
+			 */
 			public void actionPerformed(ActionEvent e)  {
 				try
 				{
-					WSDLParser parser = new WSDLParser(newBean.getWsdl());//TODO: newbean?
+					WSDLParser parser = new WSDLParser(newBean.getWsdl());
 					List<String> endpoints = parser.getOperationEndpointLocations(newBean.getOperation());
 					for (String endpoint : endpoints) //Actually i am only expecting one endpoint
 					{
@@ -305,7 +310,6 @@ public class WSDLActivityConfigurationView extends HelpEnabledDialog implements 
 						//							if (cook.getName().contains("shibsession"))
 						//								cookiessession[0]=cook;
 						//						cookies=cookiessession;
-						//						System.out.println(" tras createCookieForCallToEndpoint. cookies.length="+cookiessession.length+ " serialized="+serializetoString(cookiessession));
 
 						CredentialManager credman = CredentialManager.getInstance();
 						credman.saveUsernameAndPasswordForService(new UsernamePassword("nomatter",serializetoString(cookies)), new URI(endpoint));
@@ -354,7 +358,7 @@ public class WSDLActivityConfigurationView extends HelpEnabledDialog implements 
 		mainPanel.add(setSAMLGETCookieButton, gbc);
 		setSAMLGETCookieButton.addActionListener(getCookieListener);
 		
-		//FIN SAML
+		//END SAML
 		
 		
 		
@@ -526,8 +530,7 @@ public class WSDLActivityConfigurationView extends HelpEnabledDialog implements 
 	      
 		Object source = e.getItemSelectable();
 		
-		
-		
+		//first disable all
 		noSecurityLabel.setEnabled(false);
 		httpSecurityAuthNLabel.setEnabled(false);
 		SAMLSecurityAuthNLabel.setEnabled(false);
@@ -539,7 +542,7 @@ public class WSDLActivityConfigurationView extends HelpEnabledDialog implements 
 		setSAMLGETCookieButton.setEnabled(false);
 	
 
-		
+		//then enable the selected
 		if (source == noSecurityRadioButton) {
 			noSecurityLabel.setEnabled(true);
 		}
@@ -549,8 +552,6 @@ public class WSDLActivityConfigurationView extends HelpEnabledDialog implements 
 		}else if (source == SAMLSecurityAuthNRadioButton) {
 			SAMLSecurityAuthNLabel.setEnabled(true);
 			setSAMLGETCookieButton.setEnabled(true);
-			//TODO: seguir por aqui
-			//setHttpUsernamePasswordButton.setEnabled(true);
 		}
 		else if (source == wsSecurityAuthNRadioButton) {
 			wsSecurityAuthNLabel.setEnabled(true);

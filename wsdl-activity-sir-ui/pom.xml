@@ -28,7 +28,8 @@
 		<dependency>
 			<groupId>net.sf.taverna.t2.activities</groupId>
 			<artifactId>wsdl-activity-sir</artifactId>
-			<version>${t2.activities.version}</version>
+<!-- 			<version>${t2.activities.version}</version> -->
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.taverna.t2.ui-components</groupId>
@@ -69,5 +70,6 @@
 		
 		<!--  testing dependencies -->
 	</dependencies>
+	<version>0.1</version>
 </project>
 

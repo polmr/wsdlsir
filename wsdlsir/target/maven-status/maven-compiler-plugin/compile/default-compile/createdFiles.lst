@@ -30,7 +30,6 @@ net/sf/taverna/t2/activities/wsdlsir/xmlsplitter/XMLOutputSplitterActivity.class
 net/sf/taverna/t2/activities/wsdlsir/T2WSDLSOAPInvoker.class
 net/sf/taverna/t2/activities/wsdlsir/TestDialog$1.class
 net/sf/taverna/t2/activities/wsdlsir/security/ThreadLocalSSLSocketFactory.class
-net/sf/taverna/t2/activities/wsdlsir/CallPreparator$DefaultTrustManager.class
 net/sf/taverna/t2/activities/wsdlsir/SelectDialog$1.class
 net/sf/taverna/t2/activities/wsdlsir/WSDLActivity$1.class
 net/sf/taverna/t2/activities/wsdlsir/WSDLActivityDescriptorChecker.class
